@@ -1,0 +1,17 @@
+# Local secrets and machine-specific configuration
+.env.local
+backend/src/main/resources/application.properties
+
+# Frontend dependencies and generated output
+aerotrack-frontend/node_modules/
+aerotrack-frontend/dist/
+aerotrack-frontend/.angular/
+
+# Backend build output
+backend/target/
+
+# Bundled local JDK
+tools/jdk-*/
+
+# OS files
+.DS_Store

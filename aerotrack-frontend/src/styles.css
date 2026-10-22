@@ -1,0 +1,146 @@
+@import "leaflet/dist/leaflet.css";
+
+/* ---------- Design tokens ---------- */
+:root {
+  --bg: #0b1120;
+  --surface: #111a2e;
+  --surface-2: #17223a;
+  --border: #22304d;
+  --text: #e2e8f0;
+  --text-muted: #8b9bb8;
+  --primary: #38bdf8;
+  --primary-strong: #0ea5e9;
+  --accent: #f59e0b;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --radius: 12px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  --header-h: 60px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ---------- Scrollbars ---------- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+}
+
+/* ---------- Leaflet dark overrides ---------- */
+.leaflet-container {
+  background: var(--bg);
+  font-family: inherit;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 10px;
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--text-muted);
+}
+
+.leaflet-bar a {
+  background: var(--surface);
+  color: var(--text);
+  border-bottom-color: var(--border);
+}
+
+.leaflet-bar a:hover {
+  background: var(--surface-2);
+  color: var(--primary);
+}
+
+.leaflet-control-attribution {
+  background: rgba(11, 17, 32, 0.75) !important;
+  color: var(--text-muted) !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--primary) !important;
+}
+
+.leaflet-control-layers {
+  background: var(--surface) !important;
+  color: var(--text);
+  border: 1px solid var(--border) !important;
+  border-radius: 10px !important;
+}
+
+.plane-tooltip,
+.airport-label {
+  background: #111827 !important;
+  color: #f3f4f6 !important;
+  border: 1px solid #374151 !important;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 1px 6px !important;
+  box-shadow: none !important;
+}
+.plane-tooltip::before,
+.airport-label::before { display: none; }
+
+.airport-icon {
+  background: transparent;
+  border: none;
+}
+.airport-icon span {
+  display: inline-block;
+  padding: 1px 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #111827;
+  background: #60a5fa;
+  border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.plane-icon {
+  background: transparent;
+  border: none;
+}
+
+.plane-icon svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+  transition: transform 0.6s ease;
+}
+
+.plane-icon.selected svg {
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.95));
+}

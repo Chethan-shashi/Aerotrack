@@ -1,0 +1,19 @@
+# Database Connection
+spring.datasource.url=jdbc:postgresql://localhost:5433/aerotrack_db
+spring.datasource.username=postgres
+spring.datasource.password=CHANGE_ME
+
+# Hibernate & PostGIS Configuration
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=true
+
+# Live ADS-B data (free adsb.lol API, no key). One backend poller serves all users.
+# Region = circle centred on Karnataka (radius max 250 nautical miles)
+aerotrack.region.lat=15.0
+aerotrack.region.lon=76.3
+aerotrack.region.radius-nm=250
+aerotrack.poll-ms=5000
+aerotrack.stale-after-seconds=60
+aerotrack.trail-minutes=60

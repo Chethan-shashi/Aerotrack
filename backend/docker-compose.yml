@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  aerotrack-db:
+    image: postgis/postgis:15-3.3
+    container_name: aerotrack_postgis
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin_password
+      POSTGRES_DB: aerotrack_db
+    ports:
+      - "5433:5432"
+    restart: unless-stopped

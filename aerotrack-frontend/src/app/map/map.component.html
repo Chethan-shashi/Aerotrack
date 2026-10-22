@@ -1,0 +1,149 @@
+<div class="fr-wrap">
+  <div #mapEl class="map"></div>
+
+  <!-- ============ Search bar (top-left) ============ -->
+  <div class="search-box">
+    <div class="search-input">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.4-1.41 1.4-5.4-5.39A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>
+      <input
+        type="search"
+        placeholder="Search flight, registration or airport"
+        [ngModel]="query()"
+        (ngModelChange)="query.set($event)"
+        (focus)="searchFocused.set(true)"
+        (blur)="onSearchBlur()"
+        (keydown.enter)="results().length && pickResult(results()[0])"
+        aria-label="Search"
+      >
+    </div>
+
+    @if (searchFocused() && query().trim().length >= 2) {
+      <ul class="results">
+        @for (r of results(); track r.label + r.kind) {
+          <li>
+            <button type="button" (mousedown)="pickResult(r)">
+              <span class="tag" [class.airport]="r.kind === 'airport'">{{ r.kind === 'flight' ? 'FLIGHT' : 'AIRPORT' }}</span>
+              <span class="r-main">
+                <span class="r-label">{{ r.label }}</span>
+                <span class="r-sub">{{ r.sub }}</span>
+              </span>
+            </button>
+          </li>
+        } @empty {
+          <li class="no-results">No live flights or airports match “{{ query() }}”</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- ============ Flight details panel (left) ============ -->
+  @if (selectedHex()) {
+    <aside class="panel">
+      @if (selected(); as d) {
+        <header class="panel-head">
+          <div>
+            <div class="callsign">{{ d.callsign || d.registration || d.hex.toUpperCase() }}</div>
+            <div class="airline">{{ d.airline?.name || d.airline?.icao || 'Unknown operator' }}</div>
+          </div>
+          <button type="button" class="close" (click)="clearSelection()" aria-label="Close">×</button>
+        </header>
+
+        <!-- Route -->
+        <section class="route">
+          @if (d.route; as r) {
+            <div class="route-row">
+              <div class="ap">
+                <div class="code">{{ r.origin.iata || r.origin.icao }}</div>
+                <div class="city">{{ r.origin.city }}</div>
+              </div>
+              <div class="route-mid">
+                <svg viewBox="0 0 24 24" width="20" height="20" style="transform: rotate(90deg)"><path fill="#facc15" [attr.d]="'M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z'"/></svg>
+              </div>
+              <div class="ap right">
+                <div class="code">{{ r.destination.iata || r.destination.icao }}</div>
+                <div class="city">{{ r.destination.city }}</div>
+              </div>
+            </div>
+            @if (progress(d) !== null) {
+              <div class="progress"><div class="bar" [style.width.%]="progress(d)"></div></div>
+              <div class="progress-text">
+                <span>{{ progress(d) }}% complete</span>
+                <span>{{ distanceToGo(d) | number }} km to go</span>
+              </div>
+            }
+          } @else {
+            <div class="no-route">Route not available (private, military or unscheduled flight)</div>
+          }
+        </section>
+
+        <!-- Aircraft -->
+        <section class="block">
+          <h4>Aircraft</h4>
+          <div class="grid">
+            <div><span class="k">Type</span><span class="v">{{ d.aircraftName || '—' }}</span></div>
+            <div><span class="k">Registration</span><span class="v">{{ d.registration || '—' }}</span></div>
+            <div><span class="k">ICAO 24-bit</span><span class="v mono">{{ d.hex.toUpperCase() }}</span></div>
+            <div><span class="k">Squawk</span><span class="v mono">{{ d.squawk || '—' }}</span></div>
+          </div>
+        </section>
+
+        <!-- Live data -->
+        <section class="block">
+          <h4>Live data</h4>
+          <div class="grid">
+            <div>
+              <span class="k">Altitude</span>
+              <span class="v">
+                @if (d.onGround) { On ground } @else { {{ d.altitude != null ? (d.altitude | number) + ' ft' : '—' }} }
+              </span>
+            </div>
+            <div><span class="k">Ground speed</span><span class="v">{{ d.speed != null ? (d.speed | number: '1.0-0') + ' kts' : '—' }}</span></div>
+            <div>
+              <span class="k">Vertical speed</span>
+              <span class="v">
+                {{ d.verticalRate != null ? (d.verticalRate > 0 ? '▲ ' : d.verticalRate < 0 ? '▼ ' : '') + (d.verticalRate | number) + ' fpm' : '—' }}
+              </span>
+            </div>
+            <div><span class="k">Track</span><span class="v">{{ d.track != null ? (d.track | number: '1.0-0') + '°' : '—' }}</span></div>
+            <div><span class="k">Latitude</span><span class="v mono">{{ d.lat | number: '1.4-4' }}</span></div>
+            <div><span class="k">Longitude</span><span class="v mono">{{ d.lng | number: '1.4-4' }}</span></div>
+          </div>
+        </section>
+
+        <footer class="panel-foot">Data: adsb.lol community ADS-B network (ODbL)</footer>
+      } @else {
+        <div class="loading"><span class="spinner"></span> Loading flight…</div>
+      }
+    </aside>
+  }
+
+  <!-- ============ Right-side tools ============ -->
+  <div class="tools">
+    <button type="button" class="tool" [class.on]="showAirports()" (click)="toggleAirports()" title="Toggle airports">
+      <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+    </button>
+    <button type="button" class="tool" (click)="recenter()" title="Recenter on Karnataka">
+      <svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9 3h-2.07A7 7 0 0 0 13 5.07V3h-2v2.07A7 7 0 0 0 5.07 11H3v2h2.07A7 7 0 0 0 11 18.93V21h2v-2.07A7 7 0 0 0 18.93 13H21z"/></svg>
+    </button>
+  </div>
+
+  <!-- ============ Bottom status bar ============ -->
+  <div class="statusbar">
+    <span class="conn" [class]="'conn ' + connection()"><span class="dot"></span>
+      @switch (connection()) { @case ('online') { Live } @case ('offline') { Offline } @default { Connecting… } }
+    </span>
+    <span>{{ flights().length }} aircraft in view · {{ airborneCount() }} airborne</span>
+    @if (lastUpdated()) { <span class="muted">Updated {{ lastUpdated()!.toLocaleTimeString() }}</span> }
+  </div>
+
+  <!-- Altitude legend -->
+  <div class="legend">
+    <span style="background:#f97316"></span><span style="background:#facc15"></span><span style="background:#4ade80"></span>
+    <span style="background:#22d3ee"></span><span style="background:#818cf8"></span><span style="background:#e879f9"></span>
+    <div class="legend-labels"><i>0</i><i>2k</i><i>10k</i><i>20k</i><i>30k</i><i>38k+ ft</i></div>
+  </div>
+
+  @if (connection() === 'offline') {
+    <div class="banner" role="status">Cannot reach AeroTrack backend — retrying…</div>
+  }
+</div>
